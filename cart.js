@@ -28,42 +28,25 @@ function handleAddToCart(event) {
         return;
     }
 
-    let cart = JSON.parse(sessionStorage.getItem('solaceCart')) || [];
+    const cart = readCart();
     const existingItemIndex = cart.findIndex(item => item.id === productId);
 
-    if (existingItemIndex > -1) {
-        cart[existingItemIndex].quantity += 1;
-    } else {
-        cart.push({
-            id: productId,
-            name: productName,
-            price: productPrice,
-            image: productImage,
-            quantity: 1
-        });
-    }
+    addProductToCart(cart, existingItemIndex, {
+        id: productId,
+        name: productName,
+        price: productPrice,
+        image: productImage,
+        quantity: 1
+    });
 
-    sessionStorage.setItem('solaceCart', JSON.stringify(cart));
-
-    const messageElement = productItem.querySelector('.add-to-cart-message');
-    if (messageElement) {
-        messageElement.textContent = 'Added to cart!';
-        messageElement.classList.add('show');
-
-        setTimeout(() => {
-            messageElement.classList.remove('show');
-        }, 1500);
-    } else {
-        console.warn("Could not find .add-to-cart-message element for product:", productId);
-        alert('Added to cart!');
-    }
+    showCartFeedback(productItem, productId);
 
     console.log('Current Cart:', cart);
     updateCartIconCount();
 }
 
 function updateCartIconCount() {
-    const cart = JSON.parse(sessionStorage.getItem('solaceCart')) || [];
+    const cart = readCart();
     const cartIcon = document.querySelector('.fa-shopping-cart');
     let totalItems = 0;
     cart.forEach(item => {
@@ -89,4 +72,34 @@ function updateCartIconCount() {
             countElement.style.display = 'none';
         }
     }
+}
+
+function readCart() {
+    return JSON.parse(sessionStorage.getItem('solaceCart')) || [];
+}
+
+function addProductToCart(cart, existingItemIndex, product) {
+    if (existingItemIndex > -1) {
+        cart[existingItemIndex].quantity += 1;
+    } else {
+        cart.push(product);
+    }
+
+    sessionStorage.setItem('solaceCart', JSON.stringify(cart));
+}
+
+function showCartFeedback(productItem, productId) {
+    const messageElement = productItem.querySelector('.add-to-cart-message');
+    if (messageElement) {
+        messageElement.textContent = 'Added to cart!';
+        messageElement.classList.add('show');
+
+        setTimeout(() => {
+            messageElement.classList.remove('show');
+        }, 1500);
+    } else {
+        console.warn("Could not find .add-to-cart-message element for product:", productId);
+        alert('Added to cart!');
+    }
+
 }
